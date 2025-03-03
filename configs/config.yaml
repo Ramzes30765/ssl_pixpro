@@ -1,0 +1,36 @@
+pipeline:
+  pipe_name: 'SSL pipeline'
+  pipe_proj_name: 'PixPro'
+
+task:
+  proj_name: 'PixPro'
+  task_name: 'ResNet'
+
+model:
+  backbone: 'resnet18'
+  pretrained: False
+  projector_blocks: 1
+  predictor_blocks: 1
+  reduction: 4
+
+data:
+  img_size: 640
+  dataset_name: 'ssl_turbine_dataset'
+  train_folder: 'turbine_train'
+  val_folder: 'turbine_val'
+  batchsize: 32
+  numworkers: 16
+
+train:
+  epoch: 5
+  lr_start: 1e-3
+  lr_end: 1e-5
+  devices: 'auto'
+  accelerator: 'auto'
+  val_step: 10
+  log_step: 5
+
+val:
+  eps: 0.5
+  min_samples: 5
+  sample_fraction: 1.0
