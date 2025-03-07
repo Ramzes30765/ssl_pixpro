@@ -48,17 +48,14 @@ def register_parameters(task, args):
 
 def train():
 
-    # cfg = OmegaConf.load(cfg_path)
     cfg = parse_arguments()
     pretrained = 'pretrained' if cfg.model_pretrained else 'not_pretrained'
     now = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-    task_name = f"{cfg.task_task_name}_{pretrained}_{now}"
 
 
     train_task = Task.init(
         project_name=cfg.task_proj_name,
-        task_name=task_name,
-        tags=[cfg.model_backbone, pretrained, cfg.data_dataset_name, f'{cfg.train_epoch}_epoch'],
+        task_name=cfg.task_task_name,
         task_type=TaskTypes.training
         )
     
@@ -67,6 +64,11 @@ def train():
         repository="https://github.com/Ramzes30765/ssl_pixpro.git",
         branch="main"
     )
+
+    task_name = f"{cfg.task_task_name}_{now}"
+    train_task.set_name(task_name)
+    train_task.set_tags([cfg.model_backbone, pretrained, cfg.data_dataset_name, f'{cfg.train_epoch}_epoch'])
+    train_task.flush()
 
     train_task.execute_remotely(queue_name=cfg.pipeline_queue)
 
