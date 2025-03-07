@@ -105,4 +105,4 @@ def train():
     trainer.fit(ssl_model, datamodule=data_module)
 
 if __name__ == '__main__':
-    train('configs/config.yaml')
+    train()
