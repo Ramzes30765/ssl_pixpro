@@ -24,6 +24,7 @@ def train(cfg_path):
     )
 
     register_all_parameters(train_task, cfg)
+    train_task.set_parameter('test_param', 123)
     train_task.execute_remotely(queue_name='pixpro_queue')
 
 
