@@ -12,12 +12,9 @@ from utils.custom_callbacks import ClusteringVisualizationCallback
 
 def train(cfg_path):
 
-    print(f'cur_dir - {os.curdir()}')
-
-    # working_dir = os.environ.get("CLEARML_TASK_WORKING_DIR")
-    # if not working_dir:
-    #     working_dir = ''
-    # working_config_path = os.path.join(working_dir, cfg_path)
+    current_dir = os.getcwd()
+    print(f'Current working directory: {current_dir}')
+    print("Содержмое дректор:", os.listdir(os.getcwd()))
 
     cfg = OmegaConf.load(cfg_path)
     
@@ -37,7 +34,7 @@ def train(cfg_path):
     
     train_task.connect_configuration(cfg_path)
 
-    train_task.execute_remotely(queue_name='pixpro_queue')
+    # train_task.execute_remotely(queue_name='pixpro_queue')
     
 
     lr_callback = LearningRateMonitor(logging_interval='epoch')
