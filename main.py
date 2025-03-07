@@ -29,7 +29,7 @@ def parse_arguments():
     parser.add_argument("--data_val_folder", type=str, default='turbine_val', help="Ïàïêà ñ âàëèäàöèîííûìè äàííûìè")
     parser.add_argument("--data_batchsize", type=int, default=32, help="Ðàçìåð áàò÷à")
     parser.add_argument("--data_numworkers", type=int, default=16, help="Êîëè÷åñòâî ïîòîêîâ çàãðóçêè äàííûõ")
-    parser.add_argument("--train_epoch", type=int, default=1, help="Êîëè÷åñòâî ýïîõ")
+    parser.add_argument("--train_epoch", type=int, default=5, help="Êîëè÷åñòâî ýïîõ")
     parser.add_argument("--train_lr_start", type=float, default=1e-3, help="Íà÷àëüíàÿ ñêîðîñòü îáó÷åíèÿ")
     parser.add_argument("--train_lr_end", type=float, default=1e-5, help="Êîíå÷íàÿ ñêîðîñòü îáó÷åíèÿ")
     parser.add_argument("--train_devices", type=str, default='auto', help="Óñòðîéñòâà äëÿ îáó÷åíèÿ")
