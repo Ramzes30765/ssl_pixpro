@@ -81,7 +81,7 @@ def train():
     checkpoint_callback = ModelCheckpoint(
         dirpath=f"{cfg.task_proj_name}/{cfg.task_task_name}_{cfg.model_backbone}/{now}/checkpoints",
         filename="epoch{epoch:02d}",
-        every_n_epochs=10,
+        every_n_epochs=5,
         save_last=True,
         verbose=True
     )
