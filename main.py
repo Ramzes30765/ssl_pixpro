@@ -55,7 +55,8 @@ def train():
     train_task = Task.init(
         project_name=cfg.task_proj_name,
         task_name=cfg.task_task_name,
-        task_type=TaskTypes.training
+        task_type=TaskTypes.training,
+        output_uri='/home/kitt/ssl_pixpro/s3_demo'
         )
     
     train_task.set_script(

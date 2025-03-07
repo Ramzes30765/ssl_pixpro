@@ -1,5 +1,7 @@
 import os
 import random
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from clearml import Task
