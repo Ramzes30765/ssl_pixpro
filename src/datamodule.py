@@ -33,14 +33,14 @@ class PixProDataModule(pl.LightningDataModule):
 
         self.cfg = cfg
         self.dataset_path = ClearmlDataset.get(
-            dataset_name=cfg.data.dataset_name
+            dataset_name=cfg.data_dataset_name
             ).get_local_copy()
-        self.train_dir = os.path.join(self.dataset_path, self.cfg.data.train_folder)
-        self.val_dir = os.path.join(self.dataset_path, self.cfg.data.val_folder)
+        self.train_dir = os.path.join(self.dataset_path, self.cfg.data_train_folder)
+        self.val_dir = os.path.join(self.dataset_path, self.cfg.data_val_folder)
 
-        self.batch_size = self.cfg.data.batchsize
-        self.num_workers = self.cfg.data.numworkers
-        self.img_size = self.cfg.data.img_size
+        self.batch_size = self.cfg.data_batchsize
+        self.num_workers = self.cfg.data_numworkers
+        self.img_size = self.cfg.data_img_size
 
         self.base_transform = base_transforms(self.img_size)
 

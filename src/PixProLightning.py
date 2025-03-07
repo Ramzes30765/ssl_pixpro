@@ -17,11 +17,11 @@ class PixProModel(pl.LightningModule):
         self.cfg = cfg
         
         # model params
-        backbone = self.cfg.model.backbone
-        pretrained = self.cfg.model.pretrained
-        projector_blocks = self.cfg.model.projector_blocks
-        predictor_blocks = self.cfg.model.predictor_blocks
-        reduction = self.cfg.model.reduction
+        backbone = self.cfg.model_backbone
+        pretrained = self.cfg.model_pretrained
+        projector_blocks = self.cfg.model_projector_blocks
+        predictor_blocks = self.cfg.model_predictor_blocks
+        reduction = self.cfg.model_reduction
         
         self.model = PixPro(
             backbone_name=backbone,
@@ -32,17 +32,17 @@ class PixProModel(pl.LightningModule):
         )
         
         # train params
-        self.epoch = self.cfg.train.epoch
-        self.lr_start = self.cfg.train.lr_start
-        self.lr_end = self.cfg.train.lr_end
+        self.epoch = self.cfg.train_epoch
+        self.lr_start = self.cfg.train_lr_start
+        self.lr_end = self.cfg.train_lr_end
         
         # val params
-        self.eps = self.cfg.val.eps
-        self.min_samples = self.cfg.val.min_samples
-        self.sample_fraction = self.cfg.val.sample_fraction
+        self.eps = self.cfg.val_eps
+        self.min_samples = self.cfg.val_min_samples
+        self.sample_fraction = self.cfg.val_sample_fraction
 
         # data params
-        self.img_size = self.cfg.data.img_size
+        self.img_size = self.cfg.data_img_size
         
     def forward(self, x):
         return self.model(x)
