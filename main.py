@@ -8,7 +8,7 @@ from omegaconf import OmegaConf
 from src.PixProLightning import PixProModel
 from src.datamodule import PixProDataModule
 from utils.custom_callbacks import ClusteringVisualizationCallback
-from utils.reg_parameters import register_all_parameters
+from utils.reg_parameters import register_all_parameters, dict_to_omegaconf
 
 
 def train(cfg_path):
@@ -22,17 +22,20 @@ def train(cfg_path):
         repository="https://github.com/Ramzes30765/ssl_pixpro.git",
         branch="main"
     )
-    config = OmegaConf.to_container(cfg, resolve=True)
-    register_all_parameters(train_task, config)
-    train_task.execute_remotely(queue_name='pixpro_queue')
 
-
+    register_all_parameters(train_task, OmegaConf.to_container(cfg, resolve=True))
     params = train_task.get_parameters()
-    new_name = f"{params.get('model.backbone')}_{params.get('model.pretrained')}_{now}"
-    new_tags = [params.get('model.backbone'), params.get('data.dataset_name'), params.get('train.epoch')]
+    
+
+    new_name = f"{params.get('General/model.backbone')}_{params.get('General/model.pretrained')}_{now}"
+    new_tags = [params.get('General/model.backbone'), params.get('General/data.dataset_name'), params.get('General/train.epoch')]
 
     train_task.set_name(new_name)
     train_task.add_tags(new_tags)
+    
+    cfg = dict_to_omegaconf(params)
+
+    train_task.execute_remotely(queue_name=params.get('General/pipeline.queue'))
     
     data_module = PixProDataModule(cfg)
     data_module.setup()

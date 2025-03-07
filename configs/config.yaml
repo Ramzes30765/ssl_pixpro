@@ -1,6 +1,7 @@
 pipeline:
   pipe_name: 'SSL pipeline'
   pipe_proj_name: 'PixPro'
+  queue: 'pixpro_queue'
 
 task:
   proj_name: 'PixPro'
