@@ -14,7 +14,6 @@ from utils.reg_parameters import register_all_parameters, dict_to_omegaconf
 def train(cfg_path):
 
     cfg = OmegaConf.load(cfg_path)
-    now = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
 
     train_task = Task.init(project_name=cfg.task.proj_name)
     train_task.set_script(
@@ -24,19 +23,20 @@ def train(cfg_path):
     )
 
     register_all_parameters(train_task, OmegaConf.to_container(cfg, resolve=True))
-    params = train_task.get_parameters()
+    params = train_task.get_parameters_as_dict()['General']
     
-
-    new_name = f"{params.get('General/model.backbone')}_{params.get('General/model.pretrained')}_{now}"
-    new_tags = [params.get('General/model.backbone'), params.get('General/data.dataset_name'), params.get('General/train.epoch')]
+    now = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+    pretrained = 'pretrained' if params.get('model.pretrained') else 'not_pretrained'
+    new_name = f"{params.get('model.backbone')}_{pretrained}_{now}"
+    new_tags = [params.get('model.backbone'), params.get('data.dataset_name'), f'{params.get('train.epoch')}_epochs']
 
     train_task.set_name(new_name)
     train_task.add_tags(new_tags)
     
     cfg = dict_to_omegaconf(params)
 
-    train_task.execute_remotely(queue_name=params.get('General/pipeline.queue'))
-    
+    train_task.execute_remotely(queue_name=params.get('pipeline.queue'))
+
     data_module = PixProDataModule(cfg)
     data_module.setup()
     ssl_model = PixProModel(cfg)
@@ -44,7 +44,7 @@ def train(cfg_path):
     lr_callback = LearningRateMonitor(logging_interval='epoch')
 
     checkpoint_callback = ModelCheckpoint(
-        dirpath=f"{cfg.task.proj_name}/{cfg.task.task_name}_{cfg.model.backbone}/{now}/checpoints",
+        dirpath=f"{cfg.task.proj_name}/{cfg.task.task_name}_{cfg.model.backbone}/{now}/checkpoints",
         filename="epoch{epoch:02d}",
         every_n_epochs=10,
         save_last=True,
