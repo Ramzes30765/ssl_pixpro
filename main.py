@@ -3,13 +3,12 @@ import os, datetime
 import argparse
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.profilers import PyTorchProfiler
 from clearml import Task, TaskTypes
-from omegaconf import OmegaConf
 
 from src.PixProLightning import PixProModel
 from src.datamodule import PixProDataModule
 from utils.custom_callbacks import ClusteringVisualizationCallback
-from utils.reg_parameters import register_all_parameters, dict_to_omegaconf
 
 
 def parse_arguments():
@@ -76,6 +75,7 @@ def train():
     data_module.setup()
     ssl_model = PixProModel(cfg)
 
+    profiler = PyTorchProfiler(profile_memory=True, dirpath=".", filename="perf_logs")
     lr_callback = LearningRateMonitor(logging_interval='epoch')
 
     checkpoint_callback = ModelCheckpoint(
@@ -101,7 +101,7 @@ def train():
         check_val_every_n_epoch=cfg.train_val_step,
         log_every_n_steps=cfg.train_log_step,
         callbacks =[lr_callback, checkpoint_callback, cluster_viz_callback],
-        # profiler="simple"
+        profiler=profiler
         )
 
     trainer.fit(ssl_model, datamodule=data_module)
