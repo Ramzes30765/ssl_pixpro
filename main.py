@@ -8,41 +8,35 @@ from omegaconf import OmegaConf
 from src.PixProLightning import PixProModel
 from src.datamodule import PixProDataModule
 from utils.custom_callbacks import ClusteringVisualizationCallback
+from utils.reg_parameters import register_all_parameters
 
 
 def train(cfg_path):
 
-    train_task = Task.init(
-        project_name=cfg.task.proj_name,
-        task_name=f"{cfg.task.task_name}_{cfg.model.backbone}_{pretrained}_{now}",
-        task_type=TaskTypes.training,
-        tags=[cfg.model.backbone, pretrained, f'epochs-{cfg.train.epoch}', cfg.data.dataset_name],
-        )
-    
+    cfg = OmegaConf.load(cfg_path)
+    now = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+
+    train_task = Task.init(project_name=cfg.task.proj_name)
     train_task.set_script(
-        script="main.py",
+        entry_point="main.py",
         repository="https://github.com/Ramzes30765/ssl_pixpro.git",
         branch="main"
     )
 
-    current_dir = os.getcwd()
-    print(f'Current working directory: {current_dir}')
-    print("Содержмое дректор:", os.listdir(os.getcwd()))
+    register_all_parameters(train_task, cfg)
+    train_task.execute_remotely(queue_name='pixpro_queue')
 
-    cfg = OmegaConf.load(cfg_path)
+
+    params = train_task.get_parameters()
+    new_name = f"{params.get('model.backbone')}_{params.get('model.pretrained')}_{now}"
+    new_tags = [params.get('model.backbone'), params.get('data.dataset_name'), params.get('train.epoch')]
+
+    train_task.set_name(new_name)
+    train_task.add_tags(new_tags)
     
     data_module = PixProDataModule(cfg)
     data_module.setup()
     ssl_model = PixProModel(cfg)
-
-    now = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    pretrained = 'pretrain' if cfg.model.pretrained else 'nopretrain'
-
-    
-    train_task.connect_configuration(cfg_path)
-
-    train_task.execute_remotely(queue_name='pixpro_queue')
-    
 
     lr_callback = LearningRateMonitor(logging_interval='epoch')
 

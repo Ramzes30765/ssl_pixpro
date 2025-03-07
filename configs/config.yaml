@@ -22,7 +22,7 @@ data:
   numworkers: 16
 
 train:
-  epoch: 5
+  epoch: 1
   lr_start: 1e-3
   lr_end: 1e-5
   devices: 'auto'
