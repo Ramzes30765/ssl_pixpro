@@ -22,9 +22,8 @@ def train(cfg_path):
         repository="https://github.com/Ramzes30765/ssl_pixpro.git",
         branch="main"
     )
-
-    register_all_parameters(train_task, cfg)
-    train_task.set_parameter('test_param', 123)
+    config = OmegaConf.to_container(cfg, resolve=True)
+    register_all_parameters(train_task, config)
     train_task.execute_remotely(queue_name='pixpro_queue')
 
 
