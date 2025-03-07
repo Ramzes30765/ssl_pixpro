@@ -33,7 +33,8 @@ class PixProDataModule(pl.LightningDataModule):
 
         self.cfg = cfg
         self.dataset_path = ClearmlDataset.get(
-            dataset_name=cfg.data_dataset_name
+            dataset_name=cfg.data_dataset_name,
+            alias=cfg.data_dataset_name
             ).get_local_copy()
         self.train_dir = os.path.join(self.dataset_path, self.cfg.data_train_folder)
         self.val_dir = os.path.join(self.dataset_path, self.cfg.data_val_folder)
