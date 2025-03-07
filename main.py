@@ -105,6 +105,7 @@ def train():
         )
 
     trainer.fit(ssl_model, datamodule=data_module)
+    profiler.summary()
 
 if __name__ == '__main__':
     train()
