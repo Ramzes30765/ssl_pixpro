@@ -1,5 +1,7 @@
 import os
 import random
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 from clearml import Task
@@ -28,18 +30,17 @@ class ClusteringVisualizationCallback(pl.Callback):
             eps=self.eps, min_samples=self.min_samples
         )
         epoch = trainer.current_epoch
+        
+        logger = self.task.get_logger()
+        logger.report_matplotlib_figure(
+            title=f"Clustering Visualization Epoch {epoch}",
+            series="Clusters",
+            iteration=epoch,
+            figure=fig
+        )
+
+        print(f"Uploaded clustering visualization for epoch {epoch} to ClearML plot.")
         file_path = os.path.join(self.output_dir, f"clustering_epoch_{epoch}.png")
-        file_path_2 = os.path.join(self.output_dir, f"clustering_epoch_{epoch}_2.png")
         fig.savefig(file_path, dpi=150, bbox_inches='tight')
-        fig.savefig(file_path_2, dpi=150, bbox_inches='tight')
-        
-        if self.task is not None:
-            self.task.get_logger().report_matplotlib_figure(
-                title=f"Clustering Visualization Epoch {epoch}",
-                series="Clusters",
-                iteration=epoch,
-                figure=fig
-            )
-            print(f"Uploaded clustering visualization for epoch {epoch} to ClearML plot.")
-        
         plt.close(fig)
+        

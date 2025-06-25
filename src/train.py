@@ -1,4 +1,4 @@
-import datetime
+import os, datetime
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
@@ -11,6 +11,13 @@ from utils.custom_callbacks import ClusteringVisualizationCallback
 
 
 def train(cfg_path):
+
+    print(f'cur_dir - {os.curdir()}')
+
+    # working_dir = os.environ.get("CLEARML_TASK_WORKING_DIR")
+    # if not working_dir:
+    #     working_dir = ''
+    # working_config_path = os.path.join(working_dir, cfg_path)
 
     cfg = OmegaConf.load(cfg_path)
     
@@ -28,12 +35,9 @@ def train(cfg_path):
         tags=[cfg.model.backbone, pretrained, f'epochs-{cfg.train.epoch}', cfg.data.dataset_name],
         )
     
-    # train_task = Task.current_task()
-    # train_task.set_parent(parent_task_id)
-    # train_task.add_tags(
-    #     [cfg.model.backbone, pretrained, f'epochs-{cfg.train.epoch}', cfg.data.dataset_name]
-    #     )
     train_task.connect_configuration(cfg_path)
+
+    train_task.execute_remotely(queue_name='pixpro_queue')
     
 
     lr_callback = LearningRateMonitor(logging_interval='epoch')
