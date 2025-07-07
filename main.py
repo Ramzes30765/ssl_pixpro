@@ -58,12 +58,6 @@ def train():
         task_type=TaskTypes.training,
         output_uri='/home/kitt/ssl_pixpro/s3_demo'
         )
-    
-    train_task.set_script(
-        entry_point="main.py",
-        repository="https://github.com/Ramzes30765/ssl_pixpro.git",
-        branch="main"
-    )
 
     task_name = f"{cfg.task_task_name}_{now}"
     train_task.set_name(task_name)
@@ -86,14 +80,6 @@ def train():
         save_last=True,
         verbose=True
     )
-    
-    cluster_viz_callback = ClusteringVisualizationCallback(
-        val_dataset=data_module.val_dataset,
-        eps=cfg.val_eps,
-        min_samples=cfg.val_min_samples,
-        img_size=cfg.data_img_size,
-        output_dir=f"{cfg.task_proj_name}/{cfg.task_task_name}_{cfg.model_backbone}/{now}/cluster_plots"
-    )
 
     trainer = pl.Trainer(
         max_epochs=cfg.train_epoch,
@@ -101,7 +87,7 @@ def train():
         accelerator=cfg.train_accelerator,
         check_val_every_n_epoch=cfg.train_val_step,
         log_every_n_steps=cfg.train_log_step,
-        callbacks =[lr_callback, checkpoint_callback, cluster_viz_callback],
+        callbacks =[lr_callback, checkpoint_callback],
         profiler=profiler
         )
 

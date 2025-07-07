@@ -8,7 +8,7 @@ task:
   task_name: 'ResNet'
 
 model:
-  backbone: 'resnet18'
+  backbone: 'resnet34'
   pretrained: False
   projector_blocks: 1
   predictor_blocks: 1
