@@ -21,6 +21,7 @@ data:
   val_folder: 'turbine_val'
   batchsize: 32
   numworkers: 16
+  num_classes
 
 train:
   epoch: 1

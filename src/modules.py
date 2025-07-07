@@ -18,17 +18,17 @@ class Projector(nn.Module):
         if self.use_relu:
             self.projector = nn.Sequential(
                 *[nn.Sequential(
-                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1),
-                    nn.BatchNorm2d(proj_dim),
+                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1, bias=False),
+                    nn.BatchNorm2d(proj_dim, affine=True),
                     nn.ReLU(inplace=True),
-                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1)
+                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1, bias=False)
                 ) for _ in range(num_blocks)]
             )
         else:
             self.projector = nn.Sequential(
                 *[nn.Sequential(
-                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1),
-                    nn.BatchNorm2d(proj_dim)
+                    nn.Conv2d(proj_dim, proj_dim, kernel_size=1, bias=False),
+                    nn.BatchNorm2d(proj_dim, affine=True)
                 ) for _ in range(num_blocks)]
             )
         self.apply(_init_conv)
@@ -43,10 +43,10 @@ class Predictor(nn.Module):
         super(Predictor, self).__init__()
         self.predictor = nn.Sequential(
             *[nn.Sequential(
-                nn.Conv2d(proj_dim, hidden_dim, kernel_size=1),
-                nn.BatchNorm2d(hidden_dim),
+                nn.Conv2d(proj_dim, hidden_dim, kernel_size=1, bias=False),
+                nn.BatchNorm2d(hidden_dim, affine=True),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(hidden_dim, proj_dim, kernel_size=1)
+                nn.Conv2d(hidden_dim, proj_dim, kernel_size=1, bias=False)
             ) for _ in range(num_blocks)]
         )
         self.apply(_init_conv)

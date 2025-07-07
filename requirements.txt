@@ -1,0 +1,9 @@
+clearml=="1.17.1"
+omegaconf=="2.3.0"
+tensorboard=="2.19.0"
+pytorch-lightning=="2.5.0.post0"
+scikit-learn=="1.6.1"
+clearml-agent=="1.9.3"
+pycocotools
+matplotlib
+timm

@@ -12,8 +12,3 @@ RUN curl -sSL https://install.python-poetry.org | python3.10 - && \
     poetry install --no-interaction --no-ansi --no-root
 
 RUN pip3 install torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu124
-
-# RUN clearml-agent init \
-#     --worker-base-dir /app
-
-# CMD ["clearml-agent", "daemon", "--queue", "pixpro_queue"]
