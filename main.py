@@ -32,7 +32,7 @@ def parse_arguments():
 
     # data arguments
     parser.add_argument("--data_img_size", type=int, default=224)
-    parser.add_argument("--data_numclasses", type=int, default=640)
+    parser.add_argument("--data_numclasses", type=int, default=3)
     parser.add_argument("--data_dataset_name", type=str, default='kompressor_coco')
     parser.add_argument("--data_train_folder", type=str, default='train')
     parser.add_argument("--data_val_folder", type=str, default='valid')

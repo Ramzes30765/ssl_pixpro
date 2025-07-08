@@ -57,6 +57,10 @@ class PixProModel(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         imgs, targets = batch
+
+        for t in targets:
+            if t["labels"].numel() > 0:
+                t["labels"] = t["labels"] - 1
         
         with torch.no_grad():
             p, *_ = self.model(imgs, imgs)
