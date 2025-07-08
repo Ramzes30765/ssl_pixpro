@@ -14,19 +14,16 @@ class PixProDataModule(pl.LightningDataModule):
         super().__init__()
 
         self.cfg = cfg
-        self.dataset_root = Path(
-            ClearmlDataset.get(dataset_name=cfg.data_dataset_name,
-                               alias=cfg.data_dataset_name).get_local_copy()
-        )
-
-        self.train_imgs = self.dataset_root / cfg.data_train_images_folder
-        self.val_imgs   = self.dataset_root / cfg.data_val_images_folder
+        self.dataset = ClearmlDataset.get(dataset_name=cfg.data_dataset_name, alias=cfg.data_dataset_name)
+        self.dataset_root = Path(self.dataset.get_mutable_local_copy('dataset'))
+        self.train_imgs = self.dataset_root / cfg.data_train_folder
+        self.val_imgs   = self.dataset_root / cfg.data_val_folder
         self.train_ann  = self.dataset_root / cfg.data_train_ann
         self.val_ann    = self.dataset_root / cfg.data_val_ann
 
-        self.batch_size  = cfg.data.batchsize
-        self.num_workers = cfg.data.numworkers
-        self.img_size    = cfg.data.img_size
+        self.batch_size  = cfg.data_batchsize
+        self.num_workers = cfg.data_numworkers
+        self.img_size    = cfg.data_img_size
         
         self.pair_tf = SSLPairTransform(self.img_size)
     

@@ -4,7 +4,6 @@ import pytorch_lightning as pl
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 import torch.nn.functional as F
 from torchmetrics.classification import MultilabelAveragePrecision
-from omegaconf import OmegaConf
 
 from src.pixpro import PixPro
 from src.losses import pixpro_loss
@@ -18,24 +17,26 @@ class PixProModel(pl.LightningModule):
         self.cfg = cfg
         
         # model params
-        backbone = self.cfg.model_backbone
-        pretrained = self.cfg.model_pretrained
-        projector_blocks = self.cfg.model_projector_blocks
-        predictor_blocks = self.cfg.model_predictor_blocks
-        
+        self.backbone = self.cfg.model_backbone
+        self.pretrained = self.cfg.model_pretrained
+        self.in_features = self.cfg.model_in_features
+        self.proj_dim = self.cfg.model_proj_dim
+        self.hidden_dim = self.cfg.model_hidden_dim
+        self.projector_blocks = self.cfg.model_projector_blocks
+        self.predictor_blocks = self.cfg.model_predictor_blocks
+
         self.model = PixPro(
-            backbone_name=backbone,
-            pretrained=pretrained,
-            projector_blocks=projector_blocks,
-            predictor_blocks=predictor_blocks,
+            backbone_name=self.backbone,
+            pretrained=self.pretrained,
+            in_features=self.in_features,
+            proj_dim=self.proj_dim,
+            hidden_dim=self.hidden_dim,
+            projector_blocks=self.projector_blocks,
+            predictor_blocks=self.predictor_blocks,
         )
         
         self.num_classes = cfg.data_numclasses
-        self.roi_head   = nn.Linear(
-            in_features=self.model.proj_dim,
-            out_features=self.num_classes
-        )
-        self.probe = nn.Linear(self.model.proj_dim, self.num_classes)
+        self.probe = nn.Linear(self.proj_dim, self.num_classes)
         self.val_mAP = MultilabelAveragePrecision(num_labels=self.num_classes)
         
         self.max_epoch = self.cfg.train_epoch
@@ -50,7 +51,7 @@ class PixProModel(pl.LightningModule):
         view1, view2 = batch
         p1, p2, y1, y2 = self.model(view1, view2)
         loss = pixpro_loss(p1, p2, y1, y2)
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, batch_size=view1.size(0))
         
         return loss
     
@@ -65,12 +66,27 @@ class PixProModel(pl.LightningModule):
         labels = torch.zeros(imgs.size(0), self.num_classes, device=self.device)
         for i, t in enumerate(targets):
             labels[i, t["labels"]] = 1
+
         loss = F.binary_cross_entropy_with_logits(logits, labels)
         self.val_mAP.update(logits.sigmoid(), labels.int())
-        self.log_dict(
-            {"val_loss": loss, "val_mAP": self.val_mAP},
-            prog_bar=True, on_epoch=True, batch_size=imgs.size(0)
-        )
+        self.log("val_loss", loss, prog_bar=True, on_epoch=True, batch_size=imgs.size(0))
+
+        # # DEBUG
+        # if batch_idx == 0:
+        #     print("\n=== VAL BATCH  #0 ===")
+        #     print("imgs:",         type(imgs),   imgs.shape)
+        #     print("raw targets:",  type(targets), targets)
+        #     print("labels:",       labels.shape, labels)
+        
+        #     print("feats:",        feats.shape, feats)
+        #     print("logits:",       logits.shape, logits)
+        #     print("sigmoid:",      logits.sigmoid())
+        #     print("============================\n")
+    
+    def on_validation_epoch_end(self):
+        val_map = self.val_mAP.compute()
+        self.log("val_mAP", val_map, prog_bar=True)
+        self.val_mAP.reset()
         
         
     def configure_optimizers(self):

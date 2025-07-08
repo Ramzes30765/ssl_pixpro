@@ -11,10 +11,11 @@ def _init_conv(m: nn.Module):
         nn.init.zeros_(m.bias)
 
 class Projector(nn.Module):
-    def __init__(self, input_dim, proj_dim, num_blocks=1):
+    def __init__(self, input_dim, proj_dim, num_blocks=1, use_relu=False,):
         
         super(Projector, self).__init__()
-        self.input_conv = nn.Conv2d(input_dim, proj_dim, use_relu=False, kernel_size=1)
+        self.use_relu = use_relu
+        self.input_conv = nn.Conv2d(input_dim, proj_dim, kernel_size=1)
         if self.use_relu:
             self.projector = nn.Sequential(
                 *[nn.Sequential(

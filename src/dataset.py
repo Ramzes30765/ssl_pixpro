@@ -5,6 +5,7 @@ from PIL import Image
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
+from torchvision.datasets import CocoDetection
 from pycocotools.coco import COCO
 
 from .augmentations import SSLPairTransform
@@ -85,6 +86,7 @@ class CocoDetDataset(CocoDetection):
         }
         return img, target
     
+    @staticmethod
     def _xywh_to_xyxy(b: Sequence[float]) -> List[float]:
         x, y, w, h = b
         return [x, y, x + w, y + h]

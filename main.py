@@ -12,29 +12,42 @@ from src.datamodule import PixProDataModule
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="SSL PixPro train task")
+
+    # task argiments
     parser.add_argument("--pipeline_pipe_name", type=str, default='SSL pipeline')
     parser.add_argument("--pipeline_proj_name", type=str, default='PixPro')
     parser.add_argument("--pipeline_queue", type=str, default='pixpro_queue')
     parser.add_argument("--task_proj_name", type=str, default='PixPro')
     parser.add_argument("--task_task_name", type=str, default='ResNet')
-    parser.add_argument("--model_backbone", type=str, default='resnet18')
+
+    # model arguments
+    parser.add_argument("--model_backbone", type=str, default='resnet50')
     parser.add_argument("--model_pretrained", action="store_true")
+    parser.add_argument("--model_in_features", type=int, default=2048)
+    parser.add_argument("--model_proj_dim", type=int, default=256)
+    parser.add_argument("--model_hidden_dim", type=int, default=2048)
     parser.add_argument("--model_projector_blocks", type=int, default=1)
     parser.add_argument("--model_predictor_blocks", type=int, default=1)
     parser.add_argument("--model_reduction", type=int, default=4)
-    parser.add_argument("--data_img_size", type=int, default=4)
+
+    # data arguments
+    parser.add_argument("--data_img_size", type=int, default=224)
     parser.add_argument("--data_numclasses", type=int, default=640)
-    parser.add_argument("--data_dataset_name", type=str, default='ssl_turbine_dataset')
-    parser.add_argument("--data_train_folder", type=str, default='turbine_train')
-    parser.add_argument("--data_val_folder", type=str, default='turbine_val')
+    parser.add_argument("--data_dataset_name", type=str, default='kompressor_coco')
+    parser.add_argument("--data_train_folder", type=str, default='train')
+    parser.add_argument("--data_val_folder", type=str, default='valid')
+    parser.add_argument("--data_train_ann", type=str, default='annotations/instances_train.json')
+    parser.add_argument("--data_val_ann", type=str, default='annotations/instances_valid.json')
+
+    # train arguments
     parser.add_argument("--data_batchsize", type=int, default=32)
     parser.add_argument("--data_numworkers", type=int, default=16)
-    parser.add_argument("--train_epoch", type=int, default=5)
+    parser.add_argument("--train_epoch", type=int, default=100)
     parser.add_argument("--train_lr_start", type=float, default=1e-3)
     parser.add_argument("--train_lr_end", type=float, default=1e-5)
     parser.add_argument("--train_devices", type=str, default='auto')
     parser.add_argument("--train_accelerator", type=str, default='auto')
-    parser.add_argument("--train_val_step", type=int, default=10)
+    parser.add_argument("--train_val_step", type=int, default=5)
     parser.add_argument("--train_log_step", type=int, default=5)
     return parser.parse_args()
 
@@ -48,12 +61,13 @@ def train():
     pretrained = 'pretrained' if cfg.model_pretrained else 'not_pretrained'
     now = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
 
-
+    artifacts_dir = "/home/kitt/ssl_pixpro/artifacts"
+    os.makedirs(artifacts_dir, exist_ok=True)
     train_task = Task.init(
         project_name=cfg.task_proj_name,
         task_name=cfg.task_task_name,
         task_type=TaskTypes.training,
-        output_uri='/home/kitt/ssl_pixpro/s3_demo'
+        output_uri=artifacts_dir
         )
 
     task_name = f"{cfg.task_task_name}_{now}"
@@ -72,6 +86,9 @@ def train():
         dirpath=f"{cfg.task_proj_name}/{cfg.task_task_name}_{cfg.model_backbone}/{now}/checkpoints",
         filename="epoch{epoch:02d}",
         every_n_epochs=5,
+        monitor="val_loss",
+        mode="min",
+        save_top_k=3,
         save_last=True,
         verbose=True
     )

@@ -3,3 +3,4 @@ dataset
 lightning_logs
 PixPro
 __pycache__
+*.json
