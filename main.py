@@ -8,37 +8,34 @@ from clearml import Task, TaskTypes
 
 from src.PixProLightning import PixProModel
 from src.datamodule import PixProDataModule
-from utils.custom_callbacks import ClusteringVisualizationCallback
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="SSL PixPro train task")
-    parser.add_argument("--pipeline_pipe_name", type=str, default='SSL pipeline', help="Название пайплайна")
-    parser.add_argument("--pipeline_proj_name", type=str, default='PixPro', help="Íàçâàíèå ïðîåêòà ïàéïëàéíà")
-    parser.add_argument("--pipeline_queue", type=str, default='pixpro_queue', help="Î÷åðåäü äëÿ âûïîëíåíèÿ")
-    parser.add_argument("--task_proj_name", type=str, default='PixPro', help="Íàçâàíèå ïðîåêòà çàäà÷è")
-    parser.add_argument("--task_task_name", type=str, default='ResNet', help="Íàçâàíèå çàäà÷è")
-    parser.add_argument("--model_backbone", type=str, default='resnet18', help="Àðõèòåêòóðà ìîäåëè")
-    parser.add_argument("--model_pretrained", type=bool, default=False, help="Èñïîëüçîâàòü ïðåäîáó÷åííóþ ìîäåëü")
-    parser.add_argument("--model_projector_blocks", type=int, default=1, help="Êîëè÷åñòâî áëîêîâ ïðîåêòîðà")
-    parser.add_argument("--model_predictor_blocks", type=int, default=1, help="Êîëè÷åñòâî áëîêîâ ïðåäèêòîðà")
-    parser.add_argument("--model_reduction", type=int, default=4, help="Êîýôôèöèåíò óìåíüøåíèÿ")
-    parser.add_argument("--data_img_size", type=int, default=640, help="Ðàçìåð èçîáðàæåíèÿ")
-    parser.add_argument("--data_dataset_name", type=str, default='ssl_turbine_dataset', help="Íàçâàíèå íàáîðà äàííûõ")
-    parser.add_argument("--data_train_folder", type=str, default='turbine_train', help="Ïàïêà ñ îáó÷àþùèìè äàííûìè")
-    parser.add_argument("--data_val_folder", type=str, default='turbine_val', help="Ïàïêà ñ âàëèäàöèîííûìè äàííûìè")
-    parser.add_argument("--data_batchsize", type=int, default=32, help="Ðàçìåð áàò÷à")
-    parser.add_argument("--data_numworkers", type=int, default=16, help="Êîëè÷åñòâî ïîòîêîâ çàãðóçêè äàííûõ")
-    parser.add_argument("--train_epoch", type=int, default=5, help="Êîëè÷åñòâî ýïîõ")
-    parser.add_argument("--train_lr_start", type=float, default=1e-3, help="Íà÷àëüíàÿ ñêîðîñòü îáó÷åíèÿ")
-    parser.add_argument("--train_lr_end", type=float, default=1e-5, help="Êîíå÷íàÿ ñêîðîñòü îáó÷åíèÿ")
-    parser.add_argument("--train_devices", type=str, default='auto', help="Óñòðîéñòâà äëÿ îáó÷åíèÿ")
-    parser.add_argument("--train_accelerator", type=str, default='auto', help="Òèï àêñåëåðàöèè")
-    parser.add_argument("--train_val_step", type=int, default=10, help="Øàã âàëèäàöèè")
-    parser.add_argument("--train_log_step", type=int, default=5, help="Øàã ëîãèðîâàíèÿ")
-    parser.add_argument("--val_eps", type=float, default=0.5, help="Ïàðàìåòð eps äëÿ DBSCAN")
-    parser.add_argument("--val_min_samples", type=int, default=5, help="Ìèíèìàëüíîå êîëè÷åñòâî îáðàçöîâ äëÿ êëàñòåðà")
-    parser.add_argument("--val_sample_fraction", type=float, default=1.0, help="Äîëÿ âûáîðêè äëÿ âàëèäàöèè")
+    parser.add_argument("--pipeline_pipe_name", type=str, default='SSL pipeline')
+    parser.add_argument("--pipeline_proj_name", type=str, default='PixPro')
+    parser.add_argument("--pipeline_queue", type=str, default='pixpro_queue')
+    parser.add_argument("--task_proj_name", type=str, default='PixPro')
+    parser.add_argument("--task_task_name", type=str, default='ResNet')
+    parser.add_argument("--model_backbone", type=str, default='resnet18')
+    parser.add_argument("--model_pretrained", action="store_true")
+    parser.add_argument("--model_projector_blocks", type=int, default=1)
+    parser.add_argument("--model_predictor_blocks", type=int, default=1)
+    parser.add_argument("--model_reduction", type=int, default=4)
+    parser.add_argument("--data_img_size", type=int, default=4)
+    parser.add_argument("--data_numclasses", type=int, default=640)
+    parser.add_argument("--data_dataset_name", type=str, default='ssl_turbine_dataset')
+    parser.add_argument("--data_train_folder", type=str, default='turbine_train')
+    parser.add_argument("--data_val_folder", type=str, default='turbine_val')
+    parser.add_argument("--data_batchsize", type=int, default=32)
+    parser.add_argument("--data_numworkers", type=int, default=16)
+    parser.add_argument("--train_epoch", type=int, default=5)
+    parser.add_argument("--train_lr_start", type=float, default=1e-3)
+    parser.add_argument("--train_lr_end", type=float, default=1e-5)
+    parser.add_argument("--train_devices", type=str, default='auto')
+    parser.add_argument("--train_accelerator", type=str, default='auto')
+    parser.add_argument("--train_val_step", type=int, default=10)
+    parser.add_argument("--train_log_step", type=int, default=5)
     return parser.parse_args()
 
 def register_parameters(task, args):
@@ -64,10 +61,8 @@ def train():
     train_task.set_tags([cfg.model_backbone, pretrained, cfg.data_dataset_name, f'{cfg.train_epoch}_epoch'])
     train_task.flush()
 
-    train_task.execute_remotely(queue_name=cfg.pipeline_queue)
-
     data_module = PixProDataModule(cfg)
-    data_module.setup()
+    # data_module.setup()
     ssl_model = PixProModel(cfg)
 
     profiler = PyTorchProfiler(profile_memory=True, dirpath=".", filename="perf_logs")

@@ -30,13 +30,13 @@ class PixProModel(pl.LightningModule):
             predictor_blocks=predictor_blocks,
         )
         
-        self.num_classes = cfg.val.num_classes
+        self.num_classes = cfg.data_numclasses
         self.roi_head   = nn.Linear(
             in_features=self.model.proj_dim,
             out_features=self.num_classes
         )
         self.probe = nn.Linear(self.model.proj_dim, self.num_classes)
-        self.val_mAP = MultilabelAveragePrecision(num_labels=cfg.data.num_classes)
+        self.val_mAP = MultilabelAveragePrecision(num_labels=self.num_classes)
         
         self.max_epoch = self.cfg.train_epoch
         self.lr_start = self.cfg.train_lr_start
@@ -69,7 +69,7 @@ class PixProModel(pl.LightningModule):
         self.val_mAP.update(logits.sigmoid(), labels.int())
         self.log_dict(
             {"val_loss": loss, "val_mAP": self.val_mAP},
-            prog_bar=True, on_epoch=True, batch_size=self.cfg.data.batchsize
+            prog_bar=True, on_epoch=True, batch_size=imgs.size(0)
         )
         
         
